@@ -42,13 +42,13 @@ public class UnsafeUtils {
     static Unsafe getUnsafeWithoutAccessController() throws IllegalAccessException {
         Class<Unsafe> type = Unsafe.class;
         try {
-            Field field = type.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
+            Field field = ReflectionUtils.getField(type, "theUnsafe");
+            ReflectionUtils.setFieldToPublic(field);
             return type.cast(field.get(type));
         } catch (Exception e) {
             for (Field field : type.getDeclaredFields()) {
                 if (type.isAssignableFrom(field.getType())) {
-                    field.setAccessible(true);
+                    ReflectionUtils.setFieldToPublic(field);
                     return type.cast(field.get(type));
                 }
             }
@@ -58,6 +58,7 @@ public class UnsafeUtils {
 
 
     public static <T> Object getStaticFieldObject(Class<T> targetClass, Field field) {
+        assert UNSAFE != null;
         return UNSAFE.getObject(UNSAFE.staticFieldBase(field), UNSAFE.staticFieldOffset(field));
     }
 
